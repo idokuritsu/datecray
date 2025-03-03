@@ -26,14 +26,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 
-type RecurrenceType = "none" | "daily" | "weekly" | "monthly" | "yearly";
+type RecurrenceType =
+  | "none"
+  | "daily"
+  | "weekly"
+  | "biWeekly"
+  | "monthly"
+  | "yearly"
+  | "custom";
 
 function App() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [isOpen, setIsOpen] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrenceType, setRecurrenceType] = useState<RecurrenceType>("none");
+  const [customDays, setCustomDays] = useState<number>(4);
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
     setDate(selectedDate);
@@ -55,11 +64,14 @@ function App() {
         return "Repeats every day";
       case "weekly":
         return `Repeats every ${date ? format(date, "EEEE") : "week"}`;
-        case "bi-weekly"
+      case "biWeekly":
+        return `every 2 weeks on ${date ? format(date, "EEEE") : ""}`;
       case "monthly":
         return `Repeats monthly on the ${date ? format(date, "do") : ""}`;
       case "yearly":
         return `Repeats yearly on ${date ? format(date, "MMMM d") : ""}`;
+      case "custom":
+        return `Repeats every ${customDays} day${customDays !== 1 ? "s" : ""}`;
       default:
         return "No recurrence";
     }
@@ -116,7 +128,9 @@ function App() {
               <Label htmlFor="recurrence-type">Recurrence Pattern</Label>
               <Select
                 value={recurrenceType}
-                onValueChange={(value) => setRecurrenceType(value as RecurrenceType)}
+                onValueChange={(value) =>
+                  setRecurrenceType(value as RecurrenceType)
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select recurrence pattern" />
@@ -124,11 +138,31 @@ function App() {
                 <SelectContent>
                   <SelectItem value="daily">Daily</SelectItem>
                   <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="biWeekly">BiWeekly</SelectItem>
                   <SelectItem value="monthly">Monthly</SelectItem>
                   <SelectItem value="yearly">Yearly</SelectItem>
+                  <SelectItem value="custom">Custom</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-sm text-muted-foreground">{getRecurrenceText()}</p>
+              
+              {recurrenceType === "custom" && (
+                <div className="flex items-center space-x-2 mt-2">
+                  <Label htmlFor="custom-days">Every</Label>
+                  <Input
+                    id="custom-days"
+                    type="number"
+                    min="1"
+                    value={customDays}
+                    onChange={(e) => setCustomDays(parseInt(e.target.value) || 1)}
+                    className="w-20"
+                  />
+                  <span>days</span>
+                </div>
+              )}
+              
+              <p className="text-sm text-muted-foreground">
+                {getRecurrenceText()}
+              </p>
             </div>
           )}
 
